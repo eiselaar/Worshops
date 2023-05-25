@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workshop1 1</title>
+  </head>
+  <body>
+    <select name="countries" id="countries"></select>
+     <div>
+     <label>USD:  </label>
+     <span id="dollarC"></span> 
+     
+     <label>EUR:  </label>
+     <span id="euroC"></span>
+     </div>
+   
+    <script>
+      const ajaxRequest = new XMLHttpRequest(); //AJAX
+      ajaxRequest.addEventListener("load", (e) => {
+        const PaisesA = JSON.parse(e.target.responseText);
+        const paises = PaisesA.paises;
+        let optionsHtml = "";
+        paises.forEach((country) => {
+          console.log(country.name);
+          optionsHtml += `<option value="${country.currency}">${country.name}</option>`;
+        });
+        document.getElementById("countries").innerHTML = optionsHtml;
+        ExchangeCurrency();
+      });
+      ajaxRequest.addEventListener("error", () => {});
+      ajaxRequest.open("GET", "http://localhost:3000/paises");
+      ajaxRequest.send();
+
+      
+      function ExchangeCurrency() {
+        let crn = document.getElementById("countries").value;
+        let currency = crn.toLowerCase();
+
+        const ajaxRequest1 = new XMLHttpRequest(); //AJAX
+        ajaxRequest1.addEventListener("load", (e) => {
+          const Listcurrencies = JSON.parse(e.target.responseText);
+          const currencies = Listcurrencies[currency];
+
+          document.getElementById("dollarC").innerHTML = currencies["usd"];
+          document.getElementById("euroC").innerHTML = currencies["eur"];
+        });
+        ajaxRequest1.addEventListener("error", () => {});
+        ajaxRequest1.open(
+          "GET",
+          "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/" +
+            currency +
+            ".json"
+        );
+        ajaxRequest1.send();
+    }
+    </script>
+
+
+
+  </body>
+</html>
