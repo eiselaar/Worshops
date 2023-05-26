@@ -1,20 +1,48 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Workshop1 1</title>
+    <title>Workshop1 </title>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+
+      select {
+        padding: 8px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+      }
+
+      div {
+        margin-top: 20px;
+      }
+
+      label {
+        font-weight: bold;
+        color: #333;
+      }
+
+      span {
+        font-weight: bold;
+        color: #007bff;
+    }
+    </style>
   </head>
   <body>
     <select name="countries" id="countries"></select>
-     <div>
-     <label>USD:  </label>
-     <span id="dollarC"></span> 
-     
-     <label>EUR:  </label>
-     <span id="euroC"></span>
-     </div>
+    <div>
+      <label>USD: </label>
+      <span id="dollarC"></span>
+
+      <label>EUR: </label>
+      <span id="euroC"></span>
+    </div>
    
     <script>
       const ajaxRequest = new XMLHttpRequest(); //AJAX
@@ -27,33 +55,33 @@
           optionsHtml += `<option value="${country.currency}">${country.name}</option>`;
         });
         document.getElementById("countries").innerHTML = optionsHtml;
-        ExchangeCurrency();
+        CurrencyCam();
       });
       ajaxRequest.addEventListener("error", () => {});
       ajaxRequest.open("GET", "http://localhost:3000/paises");
       ajaxRequest.send();
 
       
-      function ExchangeCurrency() {
+      function CurrencyCam() {
         let crn = document.getElementById("countries").value;
         let currency = crn.toLowerCase();
 
-        const ajaxRequest1 = new XMLHttpRequest(); //AJAX
-        ajaxRequest1.addEventListener("load", (e) => {
+        const ajaxRequest_1 = new XMLHttpRequest(); //AJAX
+        ajaxRequest_1.addEventListener("load", (e) => {
           const Listcurrencies = JSON.parse(e.target.responseText);
           const currencies = Listcurrencies[currency];
 
           document.getElementById("dollarC").innerHTML = currencies["usd"];
           document.getElementById("euroC").innerHTML = currencies["eur"];
         });
-        ajaxRequest1.addEventListener("error", () => {});
-        ajaxRequest1.open(
+        ajaxRequest_1.addEventListener("error", () => {});
+        ajaxRequest_1.open(
           "GET",
           "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/" +
             currency +
             ".json"
         );
-        ajaxRequest1.send();
+        ajaxRequest_1.send();
     }
     </script>
 
