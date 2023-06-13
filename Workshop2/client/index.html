@@ -261,7 +261,13 @@ button:hover {
         // Obtener los valores actuales del curso
         const currentName = course.name;
         const currentCredits = course.credits;
-        const currentTeacher = course.teacher._id;
+        let currentTeacher = "";
+        if (course.teacher === undefined || course.teacher === null){
+
+        } else {
+          currentTeacher = course.teacher._id;
+        }
+
         console.log(course);
 
         // Crear un formulario para editar el curso
