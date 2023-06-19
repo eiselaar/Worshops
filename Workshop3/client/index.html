@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabla de Cursos</title>
+  <style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th {
+  background-color: #ff4081;
+  color: white;
+  font-weight: bold;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f5f5f5;
+}
+
+tr:hover {
+  background-color: #ffcdd2;
+}
+
+button {
+  padding: 8px 16px;
+  background-color: #ff4081;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #e91e63;
+}
+
+.form-container {
+  width: 400px;
+  margin: 20px auto;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #ff4081;
+}
+
+.form-group button {
+  padding: 8px 16px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-group button:hover {
+  background-color: #1976d2;
+}
+
+  </style>
+</head>
+</head>
+<body>
+    <table id="coursesTable">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Créditos</th>
+          <th>Profesor</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="form-container">
+    <h2>Filtrar Cursos</h2>
+    <div class="form-group">
+      <label for="sortDirection">Dirección:</label>
+      <select id="sortDirection">
+        <option value="asc">Ascendente</option>
+        <option value="desc">Descendente</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <button onclick="getCoursesFilter()" id="filterButton">Filtrar</button>
+    </div>
+  </div>
+
+  <div>
+  <div class="form-container">
+    <h2>Crear Curso</h2>
+    <div class="form-group">
+      <label for="nameInput">Nombre:</label>
+      <input type="text" id="nameInput">
+    </div>
+    <div class="form-group">
+      <label for="creditsInput">Créditos:</label>
+      <input type="number" id="creditsInput">
+    </div>
+    <div class="form-group">
+      <button id="createButton">Crear</button>
+    </div>
+  </div>
+
+  <script>
+    function getCourses() {
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.addEventListener("load", completed);
+      ajaxRequest.addEventListener("error", error);
+      ajaxRequest.open("GET", "http://localhost:3001/api/courses");
+      ajaxRequest.send();
+    }
+
+    function completed(event) {
+        const response = JSON.parse(event.target.responseText);
+        const tableBody = document.querySelector("#coursesTable tbody");
+
+       
+        // Limpiar la tabla antes de actualizarla
+        tableBody.innerHTML = "";
+
+        // Recorrer los cursos y agregar filas a la tabla
+        response.forEach((course) => {
+          const row = document.createElement("tr");
+          const idTr = course._id;
+          row.id = idTr;
+
+          // Crear celdas para cada propiedad del curso
+          const nameCell = document.createElement("td");
+          const nameCourse = document.createElement("input");
+          nameCourse.type = "text";
+          nameCourse.value = course.name;
+          nameCell.appendChild(nameCourse);
+          row.appendChild(nameCell);
+
+          const creditsCell = document.createElement("td");
+          const creditCourse = document.createElement("input");
+          creditCourse.type = "number";
+          creditCourse.value = course.credits;
+          creditsCell.appendChild(creditCourse);
+          row.appendChild(creditsCell);
+
+          const teacherCell = document.createElement("td");
+          const teacherCourse = document.createElement("input");
+          teacherCourse.type = "text";
+          if (course.teacher === undefined || course.teacher === null) {
+            teacherCourse.value = "Sin asignar"; // Usar 'value' en lugar de 'textContent'
+          } else {
+            teacherCourse.value =
+              course.teacher.first_name + " " + course.teacher.last_name; // Usar 'value' en lugar de 'textContent'
+          }
+          teacherCell.appendChild(teacherCourse);
+          row.appendChild(teacherCell);
+
+          // Crear celda de acciones con botones de editar y eliminar
+          const actionsCell = document.createElement("td");
+          const editButton = document.createElement("button");
+          editButton.textContent = "Editar";
+          editButton.addEventListener("click", () => {
+            editCourse(course);
+          });
+          actionsCell.appendChild(editButton);
+
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Eliminar";
+          deleteButton.addEventListener("click", () => {
+            deleteCourse(course._id);
+          });
+          actionsCell.appendChild(deleteButton);
+
+          row.appendChild(actionsCell);
+
+          tableBody.appendChild(row);
+        });
+      }
+
+  function getCoursesFilter() {
+   const sortSelector = document.querySelector("#sortDirection");
+  const sortDirection = sortSelector.value;
+
+   const ajaxRequest = new XMLHttpRequest();
+   ajaxRequest.addEventListener("load", completed);
+   ajaxRequest.addEventListener("error", error);
+   ajaxRequest.open(
+    "GET",
+    `http://localhost:3001/api/courses?sort=${sortDirection}`
+  );
+   ajaxRequest.send();
+}
+
+
+    function deleteCourse(courseId) {
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.addEventListener("load", completedDelete);
+      ajaxRequest.addEventListener("error", error);
+      ajaxRequest.open("DELETE", `http://localhost:3001/api/courses?id=${courseId}`);
+      ajaxRequest.send();
+    }
+
+    function completedDelete(event) {
+      // Lógica para manejar la respuesta del servidor después de eliminar el curso
+      console.log("Curso eliminado:", event.target.responseText);
+      // Volver a obtener la lista de cursos después de eliminar uno
+      getCourses();
+    }
+
+    function error(event) {
+      console.error("Error en la solicitud AJAX:", event.target.status);
+    }
+
+    function postCourses() {
+      const ajaxRequest = new XMLHttpRequest();
+      ajaxRequest.addEventListener("load", completedPost);
+      ajaxRequest.addEventListener("error", error);
+      ajaxRequest.open("POST", "http://localhost:3001/api/courses");
+
+      // Obtener los valores de los campos de entrada
+      const name = document.querySelector("#nameInput").value;
+      const credits = document.querySelector("#creditsInput").value;
+
+      // Crear el objeto del curso a enviar
+      const course = {
+        name: name,
+        credits: credits,
+      };
+
+      // Convertir el objeto a JSON y establecer la cabecera de la solicitud
+      ajaxRequest.setRequestHeader("Content-Type", "application/json");
+      ajaxRequest.send(JSON.stringify(course));
+    }
+
+    function completedPost(event) {
+      // Lógica para manejar la respuesta del servidor después de crear el curso
+      console.log("Curso creado:", event.target.responseText);
+      getCourses();
+    }
+
+
+    // Asignar el evento click al botón de crear
+    document.querySelector("#createButton").addEventListener("click", postCourses);
+
+
+    function editCourse(course) {
+        // Obtener los valores actuales del curso
+        const currentName = course.name;
+        const currentCredits = course.credits;
+        let currentTeacher = "";
+        if (course.teacher === undefined || course.teacher === null){
+
+        } else {
+          currentTeacher = course.teacher._id;
+        }
+
+        console.log(course);
+
+        // Crear un formulario para editar el curso
+        const form = document.createElement("form");
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = currentName;
+        form.appendChild(nameInput);
+
+        const creditsInput = document.createElement("input");
+        creditsInput.type = "number";
+        creditsInput.value = currentCredits;
+        form.appendChild(creditsInput);
+
+        const teacherInput = document.createElement("input");
+        teacherInput.type = "text";
+        teacherInput.value = currentTeacher;
+        form.appendChild(teacherInput);
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "Guardar";
+        form.appendChild(saveButton);
+
+        // Agregar evento de submit al formulario
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+          updateCourse(
+            course._id,
+            nameInput.value,
+            creditsInput.value,
+            teacherInput.value
+          );
+        });
+
+        // Reemplazar la fila actual con el formulario de edición
+        const row = document.querySelector(`tr[id="${course._id}"]`);
+        const idTr = course._id;
+        row.id = idTr;
+        row.innerHTML = "";
+        const cell = document.createElement("td");
+        cell.colSpan = 4;
+        cell.appendChild(form);
+        row.appendChild(cell);
+      }
+
+      function updateCourse(courseId, newName, newCredits, newTeacher) {
+        const ajaxRequest = new XMLHttpRequest();
+        ajaxRequest.addEventListener("load", completedUpdate);
+        ajaxRequest.addEventListener("error", error);
+        ajaxRequest.open(
+          "PATCH",
+          `http://localhost:3001/api/courses?id=${courseId}`
+        );
+        ajaxRequest.setRequestHeader("Content-Type", "application/json");
+
+        const data = {
+          name: newName,
+          credits: newCredits,
+          teacher: newTeacher,
+        };
+
+        ajaxRequest.send(JSON.stringify(data));
+      }
+
+    function completedUpdate(event) {
+      // Lógica para manejar la respuesta del servidor después de actualizar el curso
+      console.log("Curso actualizado:", event.target.responseText);
+      // Puedes realizar otras acciones aquí, como mostrar un mensaje de éxito o actualizar la tabla de cursos
+      // Volver a obtener la lista de cursos después de actualizar uno
+      getCourses();
+    }
+
+    getCourses();
+  </script>
+</body>
+</html>
